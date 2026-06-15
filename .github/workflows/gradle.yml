@@ -36,11 +36,5 @@ jobs:
           -Dsonar.projectKey=CWM \
           -Dsonar.projectName=sastPoc \
           -Dsonar.host.url=$SONAR_HOST_URL \
-          -Dsonar.token=$SONAR_TOKEN \
-          --info
-
-      # ✅ FIXED STEP
-      - name: Debug Sonar Output
-        run: |
-          echo "Checking .scannerwork directory"
-          ls -la .scannerwork || true
+          -Dsonar.login=$SONAR_TOKEN \
+          
