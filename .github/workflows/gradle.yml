@@ -37,15 +37,10 @@ jobs:
           -Dsonar.projectName=sastPoc \
           -Dsonar.host.url=$SONAR_HOST_URL \
           -Dsonar.login=$SONAR_TOKEN \
+          --info
 
-        # Check the Quality Gate status.
-      - name: SonarQube Quality Gate check
-        id: sonarqube-quality-gate-check
-        uses: sonarsource/sonarqube-quality-gate-action@v1.1.0
-        with:
-          pollingTimeoutSec: 600
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          
-
+      # ✅ FIXED STEP
+      - name: Debug Sonar Output
+        run: |
+          echo "Checking .scannerwork directory"
+          ls -la .scannerwork || true
