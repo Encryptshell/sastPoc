@@ -39,8 +39,8 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
           ./gradlew sonarqube \
-          -Dsonar.projectKey=your_project_key \
-          -Dsonar.projectName=your_project_name \
+          -Dsonar.projectKey=sastPoc \
+          -Dsonar.projectName=sastPoc \
           -Dsonar.host.url=$SONAR_HOST_URL \
           -Dsonar.login=$SONAR_TOKEN
 
