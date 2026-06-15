@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      
       - name: Checkout source code
         uses: actions/checkout@v4
 
@@ -32,7 +33,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build
 
-      
+     
       - name: SonarQube Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -42,6 +43,15 @@ jobs:
           -Dsonar.projectKey=CWM \
           -Dsonar.projectName=sastPoc \
           -Dsonar.host.url=$SONAR_HOST_URL \
-          -Dsonar.login=$SONAR_TOKEN
+          -Dsonar.login=$SONAR_TOKEN \
+          -Dsonar.qualitygate.wait=true
+
+      
+      - name: Check Quality Gate
+        uses: sonarsource/sonarqube-quality-gate-action@v1.1.0
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+       
 
       
