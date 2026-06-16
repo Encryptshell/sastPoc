@@ -25,24 +25,25 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # ✅ Build separately (no sonar here)
+      - name: Build Project
+        run: ./gradlew clean build
+
+      # ✅ Proper SonarQube scan (ONLY this, no gradle sonar command)
       - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@v2
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: |
-          ./gradlew clean build sonarqube \
-          -Dsonar.projectKey=CWM \
-          -Dsonar.projectName=sastPoc \
-          -Dsonar.host.url=$SONAR_HOST_URL \
-          -Dsonar.login=$SONAR_TOKEN \
- 
+
+      # ✅ Debug (optional but useful)
       - name: Debug - List scannerwork files
         run: ls -R .scannerwork || echo "No scannerwork directory"
 
+      # ✅ Quality Gate check
       - name: SonarQube Quality Gate Check
         uses: sonarsource/sonarqube-quality-gate-action@v1.1.0
         with:
           scanMetadataReportFile: .scannerwork/report-task.txt
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
