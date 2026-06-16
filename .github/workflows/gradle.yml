@@ -13,19 +13,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # ✅ Checkout
       - name: Checkout source code
         uses: actions/checkout@v4
 
+      # ✅ Java setup
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
+      # ✅ Gradle permission
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # ✅ Build step
+      # ✅ Build
       - name: Build Project
         run: ./gradlew clean build
 
@@ -42,15 +45,15 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-      # ✅ Debug
+      # ✅ Debug (optional)
       - name: Debug - List scannerwork files
         run: ls -R .scannerwork || echo "No scannerwork directory"
 
-      # ✅ Install jq (required)
+      # ✅ Install jq
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      # ✅ Print Quality Gate failure details
+      # ✅ Fetch & print Quality Gate details (with wait)
       - name: Get SonarQube Quality Gate Details
         run: |
           echo "Fetching Quality Gate details..."
@@ -58,7 +61,21 @@ jobs:
           TASK_URL=$(grep ceTaskUrl .scannerwork/report-task.txt | cut -d '=' -f2)
           echo "Task URL: $TASK_URL"
 
-          ANALYSIS_ID=$(curl -s -u $SONAR_TOKEN: $TASK_URL | jq -r '.task.analysisId')
+          # ⏳ Wait for analysis to complete
+          STATUS="PENDING"
+          while [[ "$STATUS" == "PENDING" || "$STATUS" == "IN_PROGRESS" ]]; do
+            RESPONSE=$(curl -s -u $SONAR_TOKEN: $TASK_URL)
+            STATUS=$(echo $RESPONSE | jq -r '.task.status')
+            echo "Current Status: $STATUS"
+            sleep 5
+          done
+
+          if [[ "$STATUS" != "SUCCESS" ]]; then
+            echo "❌ SonarQube analysis failed with status: $STATUS"
+            exit 1
+          fi
+
+          ANALYSIS_ID=$(echo $RESPONSE | jq -r '.task.analysisId')
           echo "Analysis ID: $ANALYSIS_ID"
 
           QG_RESPONSE=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/qualitygates/project_status?analysisId=$ANALYSIS_ID")
@@ -66,13 +83,13 @@ jobs:
           echo "Quality Gate Response:"
           echo "$QG_RESPONSE" | jq
 
-          echo "---- FAILED CONDITIONS ----"
+          echo "❌ ---- FAILED CONDITIONS ----"
           echo "$QG_RESPONSE" | jq -r '.projectStatus.conditions[] | select(.status=="ERROR") | "\(.metricKey): \(.actualValue) (Expected: \(.errorThreshold))"'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-      # ✅ Quality Gate (this will FAIL the pipeline if needed)
+      # ✅ Quality Gate (enforces failure)
       - name: SonarQube Quality Gate Check
         uses: sonarsource/sonarqube-quality-gate-action@v1.1.0
         with:
