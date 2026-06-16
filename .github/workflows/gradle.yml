@@ -45,9 +45,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-      # ✅ Debug (optional)
-      - name: Debug - List scannerwork files
-        run: ls -R .scannerwork || echo "No scannerwork directory"
 
       # ✅ Install jq (required)
       - name: Install jq
