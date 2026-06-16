@@ -13,26 +13,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ Checkout
+      
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      # ✅ Java setup
+      
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # ✅ Grant permission
+      
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # ✅ Build
+      
       - name: Build Project
         run: ./gradlew clean build
 
-      # ✅ SonarQube Scan
+      
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@v2
         with:
@@ -46,18 +46,18 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
 
-      # ✅ Install jq (required)
+      
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      # ✅ Fetch & print Quality Gate failure reasons
+      
       - name: Get SonarQube Quality Gate Details
         run: |
           echo "Fetching Quality Gate details..."
 
           # Validate report file
           if [ ! -f ".scannerwork/report-task.txt" ]; then
-            echo "❌ report-task.txt not found. Sonar scan failed."
+            echo "report-task.txt not found. Sonar scan failed."
             exit 1
           fi
 
@@ -66,7 +66,7 @@ jobs:
           echo "Task URL: $TASK_URL"
 
           if [[ -z "$TASK_URL" ]]; then
-            echo "❌ Failed to extract TASK_URL"
+            echo "Failed to extract TASK_URL"
             exit 1
           fi
 
@@ -78,7 +78,7 @@ jobs:
             echo "Current Status: $STATUS"
 
             if [[ "$STATUS" == "null" ]]; then
-              echo "❌ Invalid response from SonarQube:"
+              echo "Invalid response from SonarQube:"
               echo "$RESPONSE"
               exit 1
             fi
@@ -87,7 +87,7 @@ jobs:
           done
 
           if [[ "$STATUS" != "SUCCESS" ]]; then
-            echo "❌ SonarQube analysis failed with status: $STATUS"
+            echo "SonarQube analysis failed with status: $STATUS"
             exit 1
           fi
 
@@ -95,7 +95,7 @@ jobs:
           ANALYSIS_ID=$(echo "$RESPONSE" | jq -r '.task.analysisId')
 
           if [[ -z "$ANALYSIS_ID" || "$ANALYSIS_ID" == "null" ]]; then
-            echo "❌ analysisId is null"
+            echo "analysisId is null"
             exit 1
           fi
 
@@ -107,7 +107,7 @@ jobs:
           echo "Quality Gate Response:"
           echo "$QG_RESPONSE" | jq
 
-          echo "❌ ---- FAILED CONDITIONS ----"
+          echo "---- FAILED CONDITIONS ----"
           echo "$QG_RESPONSE" | jq -r '
             .projectStatus.conditions[]?
             | select(.status=="ERROR")
@@ -117,7 +117,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-      # ✅ Enforce Quality Gate (fail pipeline)
+      # Enforce Quality Gate (fail pipeline)
       - name: SonarQube Quality Gate Check
         uses: sonarsource/sonarqube-quality-gate-action@v1.1.0
         with:
