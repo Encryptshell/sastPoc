@@ -38,16 +38,41 @@ jobs:
             -Dsonar.projectName=sastPoc
             -Dsonar.sources=.
             -Dsonar.java.binaries=build
-            -X
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-      # ✅ Debug (optional)
+      # ✅ Debug
       - name: Debug - List scannerwork files
         run: ls -R .scannerwork || echo "No scannerwork directory"
 
-      # ✅ Quality Gate check
+      # ✅ Install jq (required)
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      # ✅ Print Quality Gate failure details
+      - name: Get SonarQube Quality Gate Details
+        run: |
+          echo "Fetching Quality Gate details..."
+
+          TASK_URL=$(grep ceTaskUrl .scannerwork/report-task.txt | cut -d '=' -f2)
+          echo "Task URL: $TASK_URL"
+
+          ANALYSIS_ID=$(curl -s -u $SONAR_TOKEN: $TASK_URL | jq -r '.task.analysisId')
+          echo "Analysis ID: $ANALYSIS_ID"
+
+          QG_RESPONSE=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/qualitygates/project_status?analysisId=$ANALYSIS_ID")
+
+          echo "Quality Gate Response:"
+          echo "$QG_RESPONSE" | jq
+
+          echo "---- FAILED CONDITIONS ----"
+          echo "$QG_RESPONSE" | jq -r '.projectStatus.conditions[] | select(.status=="ERROR") | "\(.metricKey): \(.actualValue) (Expected: \(.errorThreshold))"'
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      # ✅ Quality Gate (this will FAIL the pipeline if needed)
       - name: SonarQube Quality Gate Check
         uses: sonarsource/sonarqube-quality-gate-action@v1.1.0
         with:
