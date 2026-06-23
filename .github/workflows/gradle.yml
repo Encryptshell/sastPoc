@@ -73,14 +73,14 @@ jobs:
           # -----------------------------
 # Fail Pipeline if Vulnerabilities Found
 # -----------------------------
-      - name: Fail if CRITICAL vulnerabilities found
+      - name: Fail if HIGH or CRITICAL vulnerabilities found
         run: |
-          if grep -q '"Severity":"CRITICAL"' trivy-image-report.json; then
-          echo "❌ CRITICAL vulnerabilities found!"
-          exit 1
-          else
-          echo "✅ No CRITICAL vulnerabilities"
-          fi
+         if grep -E '"Severity":"(HIGH|CRITICAL)"' trivy-image-report.json; then
+          echo "❌ HIGH or CRITICAL vulnerabilities found!"
+         exit 1
+         else
+          echo "✅ No HIGH or CRITICAL vulnerabilities"
+         fi
         
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@v2
