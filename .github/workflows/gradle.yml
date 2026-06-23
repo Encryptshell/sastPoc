@@ -69,6 +69,18 @@ jobs:
         with:
           name: trivy-image-report
           path: trivy-image-report.json
+
+          # -----------------------------
+# Fail Pipeline if Vulnerabilities Found
+# -----------------------------
+      - name: Fail if CRITICAL vulnerabilities found
+        run: |
+          if grep -q '"Severity":"CRITICAL"' trivy-image-report.json; then
+          echo "❌ CRITICAL vulnerabilities found!"
+          exit 1
+          else
+          echo "✅ No CRITICAL vulnerabilities"
+          fi
         
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@v2
