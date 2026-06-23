@@ -33,37 +33,51 @@ jobs:
       - name: Build Project
         run: ./gradlew clean build
 
-    # Generate dependency tree (IMPORTANT)
-      - name: Generate Gradle Dependencies
-        run: ./gradlew dependencies --no-daemon
+  # -----------------------------
+# Install Trivy
+# -----------------------------
+      - name: Install Trivy
+        run: |
+         sudo apt-get update
+         sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+         wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+         echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+         sudo apt-get update
+         sudo apt-get install -y trivy
 
-    # Optional (debug)
-      - name: Verify Build Output
-        run: ls -lh build/libs/
+# -----------------------------
+# Build Project
+# -----------------------------
+      - name: Build Project
+        run: ./gradlew clean build
 
-  # Trivy Scan
-      - name: Run Trivy Scan (Project Dependency Scan)
-        uses: aquasecurity/trivy-action@master
-        with:
-         scan-type: 'fs'
-         scan-ref: '.'
-         format: 'json'
-         output: 'trivy-report.json'
-         severity: 'HIGH,CRITICAL'
-         exit-code: '1'
-         ignore-unfixed: true
-         scanners: 'vuln'
+# -----------------------------
+# Generate SBOM
+# -----------------------------
+      - name: Generate SBOM
+        run: |
+          trivy fs --format cyclonedx --output sbom.json .
 
-         # -----------------------------
-      # Upload Trivy Report
-    # -----------------------------
+# -----------------------------
+# Scan SBOM
+# -----------------------------
+      - name: Scan SBOM
+        run: |
+         trivy sbom sbom.json \
+         --format json \
+         --output trivy-report.json \
+         --severity HIGH,CRITICAL \
+         --exit-code 1
+
+# -----------------------------
+# Upload Trivy Report
+# -----------------------------
       - name: Upload Trivy Report
         uses: actions/upload-artifact@v4
         with:
-          name: trivy-report
-          path: trivy-report.json
-
-      
+         name: trivy-report
+         path: trivy-report.json
+        
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@v2
         with:
