@@ -29,31 +29,30 @@ jobs:
         run: chmod +x gradlew
 
       
+     # Build Project
       - name: Build Project
         run: ./gradlew clean build
 
-        # Verify Build Output
-        # -----------------------------
-      - name: Verify Build Output
-        run: ls -lh build/libs/
-
+    # Generate dependency tree (IMPORTANT)
       - name: Generate Gradle Dependencies
         run: ./gradlew dependencies --no-daemon
 
-           # -----------------------------
-    # Trivy Scan (Artifact Scan)
-    # -----------------------------
+    # Optional (debug)
+      - name: Verify Build Output
+        run: ls -lh build/libs/
+
+  # Trivy Scan
       - name: Run Trivy Scan (Project Dependency Scan)
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'json'
-          output: 'trivy-report.json'
-          severity: 'HIGH,CRITICAL'
-          exit-code: '1'
-          ignore-unfixed: true
-          scanners: 'vuln'
+         scan-type: 'fs'
+         scan-ref: '.'
+         format: 'json'
+         output: 'trivy-report.json'
+         severity: 'HIGH,CRITICAL'
+         exit-code: '1'
+         ignore-unfixed: true
+         scanners: 'vuln'
 
          # -----------------------------
       # Upload Trivy Report
