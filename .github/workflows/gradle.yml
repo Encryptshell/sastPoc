@@ -37,6 +37,9 @@ jobs:
       - name: Verify Build Output
         run: ls -lh build/libs/
 
+      - name: Generate Gradle Dependencies
+        run: ./gradlew dependencies --no-daemon
+
            # -----------------------------
     # Trivy Scan (Artifact Scan)
     # -----------------------------
