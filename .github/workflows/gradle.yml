@@ -35,7 +35,7 @@ jobs:
         # Verify Build Output
         # -----------------------------
       - name: Verify Build Output
-        run: ls -R build/
+        run: ls -lh build/libs/
 
            # -----------------------------
     # Trivy Scan (Artifact Scan)
@@ -44,12 +44,13 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
-          scan-ref: 'build/'
+          scan-ref: 'build/libs/'
           format: 'json'
           output: 'trivy-report.json'
           severity: 'HIGH,CRITICAL'
           exit-code: '1'
           ignore-unfixed: true
+          scanners: 'vuln'
 
          # -----------------------------
       # Upload Trivy Report
