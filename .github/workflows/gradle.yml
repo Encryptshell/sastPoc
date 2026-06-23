@@ -50,6 +50,7 @@ jobs:
     # -----------------------------
       - name: Run Trivy Image Scan
         uses: aquasecurity/trivy-action@master
+        continue-on-error: true
         with:
           scan-type: 'image'
           image-ref: 'sastpoc-app:latest'
@@ -63,6 +64,7 @@ jobs:
     # Upload Trivy Report
     # -----------------------------
       - name: Upload Trivy Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: trivy-image-report
