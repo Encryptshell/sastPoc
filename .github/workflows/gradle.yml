@@ -75,12 +75,17 @@ jobs:
 # -----------------------------
       - name: Fail if HIGH or CRITICAL vulnerabilities found
         run: |
-         if grep -E '"Severity":"(HIGH|CRITICAL)"' trivy-image-report.json; then
-          echo "❌ HIGH or CRITICAL vulnerabilities found!"
+         if grep -E '"Severity": ?"(HIGH|CRITICAL)"' trivy-image-report.json; then
+         echo "❌ HIGH or CRITICAL vulnerabilities found!"
          exit 1
          else
-          echo "✅ No HIGH or CRITICAL vulnerabilities"
+         echo "✅ No HIGH or CRITICAL vulnerabilities"
          fi
+
+      - name: Debug vulnerabilities
+        run: |
+         echo "------ SEVERITY LIST ------"
+         grep '"Severity"' trivy-image-report.json || echo "No vulnerabilities found"
         
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@v2
