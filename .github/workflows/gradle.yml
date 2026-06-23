@@ -40,11 +40,11 @@ jobs:
            # -----------------------------
     # Trivy Scan (Artifact Scan)
     # -----------------------------
-      - name: Run Trivy Scan (Generate JSON Report)
+      - name: Run Trivy Scan (Project Dependency Scan)
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
-          scan-ref: 'build/libs/'
+          scan-ref: '.'
           format: 'json'
           output: 'trivy-report.json'
           severity: 'HIGH,CRITICAL'
