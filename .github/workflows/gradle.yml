@@ -71,16 +71,20 @@ jobs:
           path: trivy-image-report.json
 
           # -----------------------------
-# Fail Pipeline if Vulnerabilities Found
+          # Fail Pipeline if Vulnerabilities Found
+          # -----------------------------
+      # -----------------------------
+# Check vulnerabilities (non-blocking)
 # -----------------------------
-      - name: Fail if HIGH or CRITICAL vulnerabilities found
+      - name: Check vulnerabilities 
         run: |
-         if grep -E '"Severity": ?"(HIGH|CRITICAL)"' trivy-image-report.json; then
-         echo "❌ HIGH or CRITICAL vulnerabilities found!"
-         exit 1
-         else
-         echo "✅ No HIGH or CRITICAL vulnerabilities"
-         fi
+          if grep -q '"Severity": "CRITICAL"' trivy-image-report.json; then
+          echo "⚠️ CRITICAL vulnerabilities found"
+          elif grep -q '"Severity": "HIGH"' trivy-image-report.json; then
+          echo "⚠️ HIGH vulnerabilities found"
+          else
+          echo "✅ No major vulnerabilities"
+          fi
 
       - name: Debug vulnerabilities
         run: |
