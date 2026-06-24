@@ -42,50 +42,7 @@ jobs:
       - name: Verify JAR
         run: ls -lh build/libs/
 
-    # -----------------------------
-    # Build Docker Image
-    # -----------------------------
-      - name: Build Docker Image
-        run: docker build -t sastpoc-app:latest .
-
-    # -----------------------------
-    # Trivy Image Scan
-    # -----------------------------
-      - name: Run Trivy Image Scan
-        uses: aquasecurity/trivy-action@master
-        continue-on-error: true
-        with:
-          scan-type: 'image'
-          image-ref: 'sastpoc-app:latest'
-          format: 'json'
-          output: 'trivy-image-report.json'
-          severity: 'HIGH,CRITICAL'
-          exit-code: '1'
-          ignore-unfixed: true
-
-    # -----------------------------
-    # Upload Trivy Report
-    # -----------------------------
-      - name: Upload Trivy Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: trivy-image-report
-          path: trivy-image-report.json
-
-         
-  # Check vulnerabilities (non-blocking)
-
-      - name: Check vulnerabilities 
-        run: |
-          if grep -q '"Severity": "CRITICAL"' trivy-image-report.json; then
-          echo "⚠️ CRITICAL vulnerabilities found"
-          elif grep -q '"Severity": "HIGH"' trivy-image-report.json; then
-          echo "⚠️ HIGH vulnerabilities found"
-          else
-          echo "✅ No major vulnerabilities"
-          fi
-        
+          
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@v2
         with:
