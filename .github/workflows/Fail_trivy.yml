@@ -5,7 +5,7 @@ on:
     branches:
       - Dev
     paths:
-      - '.github/workflows/trivy.yml'
+      - '.github/workflows/Fail_trivy.yml'
       - 'Dockerfile'
       - '**/*.java'
       - 'build.gradle'
