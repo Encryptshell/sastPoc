@@ -66,12 +66,16 @@ jobs:
 
       # Check vulnerabilities (non-blocking)
 
-      - name: Check vulnerabilities 
+      - name: Check vulnerabilities
         run: |
           if grep -q '"Severity": "CRITICAL"' trivy-image-report.json; then
-          echo "⚠️ CRITICAL vulnerabilities found"
-          elif grep -q '"Severity": "HIGH"' trivy-image-report.json; then
+          echo "❌ CRITICAL vulnerabilities found"
+          fi
+
+          if grep -q '"Severity": "HIGH"' trivy-image-report.json; then
           echo "⚠️ HIGH vulnerabilities found"
-          else
+          fi
+
+          if ! grep -qE '"Severity": "(HIGH|CRITICAL)"' trivy-image-report.json; then
           echo "✅ No major vulnerabilities"
           fi
