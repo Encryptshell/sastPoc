@@ -4,10 +4,13 @@ on:
   push:
     branches:
       - Dev
+    paths:
+      - '.github/workflows/sonarqube.yml'
+      - '**/*.java'
+      - 'build.gradle'
   pull_request:
     branches:
       - Dev
-
 jobs:
   build:
     runs-on: ubuntu-latest
