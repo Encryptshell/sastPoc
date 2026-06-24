@@ -68,7 +68,7 @@ jobs:
           output: 'trivy-image-report.json'
           severity: 'HIGH,CRITICAL'
           exit-code: '1'
-          ignore-unfixed: true
+          
 
     # -----------------------------
     # Upload Trivy Report
