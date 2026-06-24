@@ -2,6 +2,7 @@ FROM eclipse-temurin:17-jdk-jammy
 
 RUN mkdir /javavulny /app
 COPY . /javavulny/
+RUN chmod +x /javavulny/gradlew
 RUN sed -i 's/localhost\:5432/db\:5432/' /javavulny/src/main/resources/application-postgresql.properties
 
 RUN cd /javavulny \
