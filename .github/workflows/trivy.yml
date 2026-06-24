@@ -4,9 +4,19 @@ on:
   push:
     branches:
       - Dev
+    paths:
+      - '.github/workflows/trivy.yml'
+      - 'Dockerfile'
+      - '**/*.java'
+      - 'build.gradle'
   pull_request:
     branches:
       - Dev
+    paths:
+      - '.github/workflows/trivy.yml'
+      - 'Dockerfile'
+      - '**/*.java'
+      - 'build.gradle'
 
 jobs:
   build:
@@ -71,12 +81,12 @@ jobs:
           path: trivy-image-report.json
 
 
-      - name: Check vulnerabilities 
+      - name: Fail if HIGH or CRITICAL vulnerabilities found
         run: |
-          if grep -q '"Severity": "CRITICAL"' trivy-image-report.json; then
-          echo "⚠️ CRITICAL vulnerabilities found"
-          elif grep -q '"Severity": "HIGH"' trivy-image-report.json; then
-          echo "⚠️ HIGH vulnerabilities found"
-          else
-          echo "✅ No major vulnerabilities"
-          fi
+         if grep -E '"Severity": ?"(HIGH|CRITICAL)"' trivy-image-report.json; then
+         echo "❌ HIGH or CRITICAL vulnerabilities found!"
+         exit 1
+         else
+         echo "✅ No HIGH or CRITICAL vulnerabilities"
+         fi
+
